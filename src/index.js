@@ -1,6 +1,7 @@
 const express = require('express')
 require('./db/mongoose.js') // to ensure mongoose.js runs so mongoose gets connected to database
 const User = require('./models/user.js')
+const Task = require('./models/task.js')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -10,13 +11,48 @@ app.use(express.json())
 app.post('/users', (req, res) => {
     const user = new User(req.body)
 
+
     user.save().then(() => {
-        console.log(user)
-        res.send(user)
+        res.status(201).send(user) // where r u sending this ?
 
     }).catch((e) => {
-        console.log(e)
-        res.send(e)
+        res.status(400).send(e) //y hardcode 400, y not 500? could be other error too; y we had to specify ; y 200 was coming when clearly it was an error
+        
+    })
+})
+
+app.get('/users', (req, res) => {
+    User.find({}).then((users) => {
+        res.send(users)
+    }).catch((e) => {
+        res.status(500).send(e) 
+    })
+})
+
+app.get('/users/:id', (req, res) => {   // : before dynamic values
+    const _id = req.params.id // mongoose automatically converts string id to objct id
+    
+    User.findById(_id).then((user) => {
+        if(!user) {
+            return res.status(404).send()
+        }
+        res.send(user)
+    }).catch((e) => {
+        if(e.name === 'CastError'){
+            return res.status(400).send('Invalid id')
+        }
+        res.status(500).send(e) 
+    })
+})
+
+app.post('/tasks', (req,res) => {
+    const task = new Task(req.body)
+
+    task.save().then(() => {
+        res.status(201).send(task)
+    }).catch((e) => {
+        res.status(400).send(e)
+        
     })
 })
 
