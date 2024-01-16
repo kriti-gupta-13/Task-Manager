@@ -8,78 +8,161 @@ const port = process.env.PORT || 3000
 
 app.use(express.json())
 
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
     const user = new User(req.body)
 
 
-    user.save().then(() => {
-        res.status(201).send(user) // where r u sending this ?
+    try{
+        await user.save()
+        console.log(user)
+        res.status(201).send(user) // will go into res.body
+    }
 
-    }).catch((e) => {
-        res.status(400).send(e) //y hardcode 400, y not 500? could be other error too; y we had to specify ; y 200 was coming when clearly it was an error
-        
-    })
+    catch(e){
+        res.status(400).send(e) //y hardcode 400, y not 500? could be other error too; y we had to specify ; y 200 was coming when clearly it was an error   
+    }
 })
 
-app.get('/users', (req, res) => {
-    User.find({}).then((users) => {
-        res.send(users)
-    }).catch((e) => {
+app.get('/users', async (req, res) => {
+
+    try{
+    const users = await User.find({})
+    res.send(users)
+    }
+
+    catch(e) {
         res.status(500).send(e) 
-    })
+    }
 })
 
-app.get('/users/:id', (req, res) => {   // : before dynamic values
+app.get('/users/:id', async (req, res) => {   // : before dynamic values
     const _id = req.params.id // mongoose automatically converts string id to objct id
-    
-    User.findById(_id).then((user) => {
+
+    try{
+        const user = await User.findById(_id)
         if(!user) {
             return res.status(404).send()
         }
         res.send(user)
-    }).catch((e) => {
+    }
+
+    catch(e) {
         if(e.name === 'CastError'){
             return res.status(400).send('Invalid id')
         }
         res.status(500).send(e) 
-    })
+    }
 })
 
-app.post('/tasks', (req,res) => {
-    const task = new Task(req.body)
-
-    task.save().then(() => {
-        res.status(201).send(task)
-    }).catch((e) => {
-        res.status(400).send(e)
+app.patch('/users/:id', async (req, res) => {
+    const _id = req.params.id
+    try{
+        const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
         
-    })
+        if (!updatedUser){
+            return res.status(404).send('no user with the id exist')
+        }
+        res.send(updatedUser)
+
+    }
+    catch(e) {
+        res.status(400).send(e) // did not mentioned 500 or server issues
+    }
 })
 
-app.get('/tasks', (req, res) => {
-    Task.find({}).then((tasks) => {
+app.delete('/users/:id', async (req, res) => {
+    const _id = req.params.id
+    
+    try{
+        const user = await User.findByIdAndDelete(_id)
+        if(!user) {
+            return res.status(404).send('no user with the id exist')
+        }
+        res.send()
+    }
+    catch(e) {
+        res.status(500).send(e) // sends 500 when invalid id !!!
+    }
+
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+    const _id = req.params.id
+    try{
+        const updatedTask = await Task.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) 
+        
+        if (!updatedTask){
+            return res.status(404).send('no task with the id exist')
+        }
+        res.send(updatedTask)
+
+    }
+    catch(e) {
+        res.status(400).send(e) // did not mentioned 500 or server issues
+    }
+})        
+    
+
+app.post('/tasks', async (req,res) => {
+    const task = new Task(req.body)
+    
+    try{
+        await task.save()
+        res.status(201).send(task)
+    }
+    
+    catch(e) {
+        res.status(400).send(e)   
+    }
+})
+
+app.get('/tasks', async (req, res) => {
+
+    try{
+        const tasks = await Task.find({})
         res.send(tasks)
-    }).catch((e) => {
+    }
+    
+    catch(e) {
         res.status(500).send(e) 
-    })
+    }
 })
 
-app.get('/tasks/:id', (req, res) => {   
+app.get('/tasks/:id', async (req, res) => {   
     const _id = req.params.id 
     
-    Task.findById(_id).then((task) => {
-        if(!task) {
-            // when id structure is valid but no such id in db
-            return res.status(404).send()
-        }
-        res.send(task)
-    }).catch((e) => {
+    try{
+        const task = await Task.findById(_id)
+            if(!task) {
+                // when no such id in db
+                return res.status(404).send()
+            }
+            res.send(task)
+    }
+    
+    catch(e){
         if(e.name === 'CastError'){
             //for when say id inputed is not of 12 bytes
             return res.status(400).send('Invalid id')
         }
         res.status(500).send(e) 
-    })
+    }
+})
+
+app.delete('/tasks/:id', async (req, res) => {
+    const _id = req.params.id
+    
+    try{
+        const task = await Task.findByIdAndDelete(_id)
+        if(!task) {
+            return res.status(404).send('no task with the id exist')
+        }
+        res.send()
+    }
+    catch(e) {
+        res.status(400).send(e) // for when id str is invalid; no where account for 500
+    }
+
 })
 
 app.listen(port, () => {
