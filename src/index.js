@@ -56,6 +56,15 @@ app.get('/users/:id', async (req, res) => {   // : before dynamic values
 
 app.patch('/users/:id', async (req, res) => {
     const _id = req.params.id
+
+    // to communicate error when non-existent fields r updated
+    const allowedUpdates = ["name", "mail", "password","age"]
+    const updates = Object.keys(req.body)
+    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
+    if (!isValidUpdate) {
+        return res.status(404).send("Invalid updates")
+    }
+
     try{
         const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
         
@@ -88,6 +97,14 @@ app.delete('/users/:id', async (req, res) => {
 
 app.patch('/tasks/:id', async (req, res) => {
     const _id = req.params.id
+
+    const allowedUpdates = ["description", "completed"]
+    const updates = Object.keys(req.body)
+    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
+    if (!isValidUpdate) {
+        return res.status(404).send("Invalid updates")
+    }
+
     try{
         const updatedTask = await Task.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) 
         
