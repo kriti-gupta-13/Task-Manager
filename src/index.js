@@ -2,11 +2,15 @@ const express = require('express')
 require('./db/mongoose.js') // to ensure mongoose.js runs so mongoose gets connected to database
 const User = require('./models/user.js')
 const Task = require('./models/task.js')
+const userRouter = require('./models/user.js')
+const taskRouter = require('./models/task.js')
 
 const app = express()
 const port = process.env.PORT || 3000
 
 app.use(express.json())
+app.use(userRouter) // y being loaded as middleware?
+app.use(taskRouter)
 
 app.post('/users', async (req, res) => {
     const user = new User(req.body)
@@ -66,12 +70,20 @@ app.patch('/users/:id', async (req, res) => {
     }
 
     try{
-        const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
-        
-        if (!updatedUser){
+        const user = await User.findById(_id)
+
+        if (!user){
             return res.status(404).send('no user with the id exist')
         }
-        res.send(updatedUser)
+
+        updates.forEach((update) => user[update] = req.body[update])
+
+        await user.save()
+
+        // findByIdAndUpdate bypasses middleware therefore not using it
+        //const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
+        
+        res.send(user)
 
     }
     catch(e) {
@@ -93,30 +105,6 @@ app.delete('/users/:id', async (req, res) => {
         res.status(500).send(e) // sends 500 when invalid id !!!
     }
 
-})
-
-app.patch('/tasks/:id', async (req, res) => {
-    const _id = req.params.id
-
-    const allowedUpdates = ["description", "completed"]
-    const updates = Object.keys(req.body)
-    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
-    if (!isValidUpdate) {
-        return res.status(404).send("Invalid updates")
-    }
-
-    try{
-        const updatedTask = await Task.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) 
-        
-        if (!updatedTask){
-            return res.status(404).send('no task with the id exist')
-        }
-        res.send(updatedTask)
-
-    }
-    catch(e) {
-        res.status(400).send(e) // did not mentioned 500 or server issues
-    }
 })        
     
 
@@ -165,6 +153,38 @@ app.get('/tasks/:id', async (req, res) => {
         res.status(500).send(e) 
     }
 })
+
+
+app.patch('/tasks/:id', async (req, res) => {
+    const _id = req.params.id
+
+    const allowedUpdates = ["description", "completed"]
+    const updates = Object.keys(req.body)
+    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
+    if (!isValidUpdate) {
+        return res.status(404).send("Invalid updates")
+    }
+
+    try{
+        const task = await Task.findById(_id)
+
+        if (!task){
+            return res.status(404).send('no task with the id exist')
+        }
+
+        //const updatedTask = await Task.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) 
+        updates.forEach((update) => task[update] = req.body[update])
+
+        await task.save()
+        
+        res.send(task)
+
+    }
+    catch(e) {
+        res.status(400).send(e) // did not mentioned 500 or server issues
+    }
+})
+
 
 app.delete('/tasks/:id', async (req, res) => {
     const _id = req.params.id

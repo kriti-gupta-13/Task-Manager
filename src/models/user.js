@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const bcryptjs = require('bcryptjs')
 
 const userSchema = new mongoose.Schema({
     name: { 
@@ -44,11 +45,13 @@ const userSchema = new mongoose.Schema({
 
     
 })
-
+// hashing password
 userSchema.pre('save', async function (next) { // cannot use arrow func cuz does not support this binding
-    this //refers to document being saved
+    const user = this //refers to document being saved
 
-
+    if (user.isModified('password')) {   // isModified will be true if password created or updated
+        user.password = await bcryptjs.hash(user.password, 8)
+    }
 
     next() // signifies end of function so the event (here "save") can run, w/o next save wont run
 } )
