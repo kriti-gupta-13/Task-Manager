@@ -8,7 +8,7 @@ router.post('/users', async (req, res) => {
     const user = new User(req.body)
 
 
-    try{
+    try {
         await user.save()
         console.log(user)
         res.status(201).send(user) // will go into res.body
@@ -19,9 +19,18 @@ router.post('/users', async (req, res) => {
     }
 })
 
+router.post('/users/login', async (req, res) => {
+    try {
+        const user = await User.findByCredentials(req.body.mail, req.body.password)
+        res.send(user)
+    } catch(e) {
+        res.status(400).send()
+    }
+})
+
 router.get('/users', async (req, res) => {
 
-    try{
+    try {
     const users = await User.find({})
     res.send(users)
     }
@@ -34,7 +43,7 @@ router.get('/users', async (req, res) => {
 router.get('/users/:id', async (req, res) => {   // : before dynamic values
     const _id = req.params.id // mongoose automatically converts string id to objct id
 
-    try{
+    try {
         const user = await User.findById(_id)
         if(!user) {
             return res.status(404).send()
@@ -61,7 +70,7 @@ router.patch('/users/:id', async (req, res) => {
         return res.status(404).send("Invalid updates")
     }
 
-    try{
+    try {
         const user = await User.findById(_id)
 
         if (!user){
@@ -86,7 +95,7 @@ router.patch('/users/:id', async (req, res) => {
 router.delete('/users/:id', async (req, res) => {
     const _id = req.params.id
     
-    try{
+    try {
         const user = await User.findByIdAndDelete(_id)
         if(!user) {
             return res.status(404).send('no user with the id exist')

@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     mail: {
         type : String,
         required : true,
+        unique : true,
         trim : true,
         lowercase : true,
         validate(value) {
@@ -45,7 +46,24 @@ const userSchema = new mongoose.Schema({
 
     
 })
-// hashing password
+
+userSchema.statics.findByCredentials = async (mail, password) => { // statics is used when function is on model(User.function) whereas schema.method used when function is on specific instance of model (user1.function)
+
+    const user = await User.findOne({ mail }) // mail: mail can be written as mail
+    
+    if(!user) {
+        throw new Error('Unable to login') // where this will be printed - its not in console or res?
+    }
+    
+    const isMatch = await bcryptjs.compare(password, user.password)
+    
+    if (!isMatch) {
+        throw new Error('Unable to login')
+    }
+    return user
+}
+
+// hashing password before saving
 userSchema.pre('save', async function (next) { // cannot use arrow func cuz does not support this binding
     const user = this //refers to document being saved
 
