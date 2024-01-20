@@ -13,7 +13,9 @@ const Task = mongoose.model('Task',{
     },
     owner : {
         type: mongoose.Schema.Types.ObjectId,
-        required : true
+        required : true,
+        ref : 'User' // exact name of collection we wanna link to
+        // how it knew to connect value in owner to id field of user 
     }
 
 })

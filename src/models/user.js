@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('./task')
 
 const userSchema = new mongoose.Schema({
     name: { 
@@ -51,6 +52,13 @@ const userSchema = new mongoose.Schema({
             }
         }]
 })
+//virtual doesnt actually anything in db but here is a way for mongoose to connect the 2 collection
+userSchema.virtual('tasks', { // when we populate tasks we r doing - user.tasks = find all tasks with owner ==_id 
+    // can we iterate over the docs in a collection?
+    ref : 'Task',
+    localField : "_id",
+    foreignField : "owner"
+})
 
 userSchema.methods.toJSON = function() { //toJSON is called automatically when stringifying the res therefore dont need to explicitly call it anywhere 
     const user  = this 
@@ -91,7 +99,7 @@ userSchema.statics.findByCredentials = async (mail, password) => { // statics is
 }
 
 // hashing password before saving
-userSchema.pre('save', async function (next) { // cannot use arrow func cuz does not support "this" binding
+userSchema.pre('save', async function(next) { // cannot use arrow func cuz does not support "this" binding
     const user = this //refers to document being saved
 
     if (user.isModified('password')) {   // isModified will be true if password created or updated
@@ -100,6 +108,13 @@ userSchema.pre('save', async function (next) { // cannot use arrow func cuz does
 
     next() // signifies end of function so the event (here "save") can run, w/o next save wont run
 } )
+
+// deleteing all tasks when user is removed
+userSchema.pre('deleteOne', {document: true, query : false}, async function(next) { // lm abt options?
+    const user = this
+    await Task.deleteMany({owner : user._id})
+    next()
+})
 
 const User = mongoose.model('User', userSchema)
 
