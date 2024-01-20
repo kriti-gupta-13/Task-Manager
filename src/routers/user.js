@@ -59,27 +59,9 @@ router.get('/users/me', auth, async (req, res) => {
     res.send(req.user)
 })
 
-router.get('/users/:id', async (req, res) => {   // : before dynamic values
-    const _id = req.params.id // mongoose automatically converts string id to objct id
 
-    try {
-        const user = await User.findById(_id)
-        if(!user) {
-            return res.status(404).send()
-        }
-        res.send(user)
-    }
-
-    catch(e) {
-        if(e.name === 'CastError'){
-            return res.status(400).send('Invalid id')
-        }
-        res.status(500).send(e) 
-    }
-})
-
-router.patch('/users/:id', async (req, res) => {
-    const _id = req.params.id
+router.patch('/users/me', auth, async (req, res) => {
+    
 
     // to communicate error when non-existent fields r updated
     const allowedUpdates = ["name", "mail", "password","age"]
@@ -90,20 +72,16 @@ router.patch('/users/:id', async (req, res) => {
     }
 
     try {
-        const user = await User.findById(_id)
+        //const user = await User.findById(_id)
 
-        if (!user){
-            return res.status(404).send('no user with the id exist')
-        }
+        updates.forEach((update) => req.user[update] = req.body[update])
 
-        updates.forEach((update) => user[update] = req.body[update])
-
-        await user.save()
+        await req.user.save()
 
         // findByIdAndUpdate bypasses middleware therefore not using it
         //const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
         
-        res.send(user)
+        res.send(req.user)
 
     }
     catch(e) {
@@ -111,18 +89,14 @@ router.patch('/users/:id', async (req, res) => {
     }
 })
 
-router.delete('/users/:id', async (req, res) => {
-    const _id = req.params.id
+
+router.delete('/users/me', auth, async (req, res) => {
     
     try {
-        const user = await User.findByIdAndDelete(_id)
-        if(!user) {
-            return res.status(404).send('no user with the id exist')
-        }
-        res.send()
-    }
-    catch(e) {
-        res.status(500).send(e) // sends 500 when invalid id !!!
+        await req.user.deleteOne()
+        res.send(req.user)
+    } catch(e) {
+        res.status(500).send(e) 
     }
 
 })
