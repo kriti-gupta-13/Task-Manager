@@ -21,12 +21,36 @@ router.post('/tasks', auth, async (req,res) => {
         res.status(400).send(e)   
     }
 })
-
+//GET /tasks?completed=false
+//GET /tasks?limit=2&skip=2
+//GET /tasks?sortBy=createdAt:desc
 router.get('/tasks', auth, async (req, res) => {
 
     try{
-        const tasks = await Task.find({owner : req.user._id})
-        res.send(tasks)
+        const match = {}
+        const sort = {}
+
+        if (req.query.completed) {
+            match.completed = JSON.parse(req.query.completed) 
+            // parse converts string "true" to boolean true
+            // only works when given true or false; throw error on any other   
+        }
+
+        if (req.query.sortBy) {
+            const parts = req.query.sortBy.split(':')
+            sort[parts[0]] = parts[1]
+        }
+        await req.user.populate({
+            path : 'tasks',
+            match, //match option can specify tasks we wanna match; match cannot be under options? no need of if condition then
+            options : {
+                limit : parseInt(req.query.limit), //limits no of result per page
+                skip : parseInt(req.query.skip), // if skip is 3 and limit 3 it will show second pg; skip is 6 then 3rd pg
+                sort 
+            }        
+            
+        })
+        res.send(req.user.tasks)
     }
     
     catch(e) {

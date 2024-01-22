@@ -51,7 +51,11 @@ const userSchema = new mongoose.Schema({
 
             }
         }]
+}, {
+    timestamps: true
 })
+
+
 //virtual doesnt actually anything in db but here is a way for mongoose to connect the 2 collection
 userSchema.virtual('tasks', { // when we populate tasks we r doing - user.tasks = find all tasks with owner ==_id 
     // can we iterate over the docs in a collection?
