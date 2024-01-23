@@ -5,7 +5,7 @@ const transporter = function () {
         service: 'gmail',
         auth: {
           user: 'kritisg2014@gmail.com',
-          pass: 'oapc ttoe kahb tazs'
+          pass: process.env.GMAIL_PASSWORD
         }
       })
 }

@@ -2,6 +2,7 @@ const express = require('express')
 const router = new express.Router()
 const auth = require('../middleware/auth.js')
 const User = require('../models/user')
+const emails = require('../emails/accounts') 
 
 
 
@@ -11,6 +12,7 @@ router.post('/users', async (req, res) => {
 
     try {
         await user.save()
+        emails.sendWelcomeMail(user.mail,user.name) // async but dont need to wait therefore no await 
         const token = await user.generateAuthToken()
 
         console.log(user)
@@ -94,6 +96,7 @@ router.delete('/users/me', auth, async (req, res) => {
     
     try {
         await req.user.deleteOne()
+        emails.sendDeleteMail(req.user.mail,req.user.name)
         res.send(req.user)
     } catch(e) {
         res.status(500).send(e) 

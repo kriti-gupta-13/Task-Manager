@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb://127.0.0.1:27017/task-manager-api"); // to connect mongoose to databases
+mongoose.connect(process.env.MONGODB_URL); // to connect mongoose to databases
+
+//mongodb+srv://Task_manager:CakWUNX55HPETwIv@cluster0.ea82w1q.mongodb.net/
 
 
 
