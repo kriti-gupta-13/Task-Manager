@@ -1,9 +1,9 @@
 const express = require('express')
 const router = new express.Router()
 const auth = require('../middleware/auth.js')
+//const oauth = require('../middleware/oauth.js')
 const User = require('../models/user')
 const emails = require('../emails/accounts') 
-
 
 
 router.post('/users', async (req, res) => {
