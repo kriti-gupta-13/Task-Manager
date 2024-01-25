@@ -12,6 +12,10 @@ const taskSchema = new mongoose.Schema({
             type : Boolean,
             default : false
         },
+        dueDate : {
+            type : Date,
+            required: true
+        },
         owner : {
             type: mongoose.Schema.Types.ObjectId,
             required : true,

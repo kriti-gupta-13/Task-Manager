@@ -12,7 +12,7 @@ const session = require('express-session');
 
 
 
-app.use(session({ secret: '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', resave: true, saveUninitialized: true }));
+app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 
 app.use(express.json())
 app.use(userRouter) 

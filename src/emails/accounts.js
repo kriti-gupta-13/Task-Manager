@@ -43,7 +43,19 @@ const sendDeleteMail = (mail,name) => {
       sendMail(mailOptions)
 }
 
+// how this would conflict with status. what if done?
+const sendAlertMail = (mail, description) => {
+  var mailOptions = {
+      from: 'kritisg2014@gmail.com',
+      to: mail,
+      subject: 'Due date in 5 min',
+      text: `Your due date for ${description} is approching in 5 mins`
+    };
+    sendMail(mailOptions)
+}
+
 module.exports = {
     sendWelcomeMail,
-    sendDeleteMail
+    sendDeleteMail,
+    sendAlertMail
 }

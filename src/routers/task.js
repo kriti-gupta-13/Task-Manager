@@ -2,18 +2,31 @@ const express = require('express')
 const router = express.Router()
 const Task = require('../models/task')
 const auth = require('../middleware/auth.js')
+const moment = require('moment')
+const emails = require('../emails/accounts') 
+
 
 
 
 router.post('/tasks', auth, async (req,res) => {
     
-    const task = new Task({
+    const taskData = {
         ...req.body, // spread operator - spreads iterable into individual elements
         owner : req.user._id
-    })
+    }
+    
+    const dueDate = req.body.dueDate
+    const dueDateTime = moment(dueDate, 'YYYY-MM-DD HH:mm')
+    taskData.dueDate = dueDateTime.toDate()
+    
+    const task = new Task(taskData)
     
     try{
         await task.save()
+        timeToSendEmail = moment(task.dueDate).subtract(5, 'minutes').toDate()
+        //schedule it 
+        //get owner from id -> get mail
+        //emails.sendAlertMail(mail,task.description)
         res.status(201).send(task)
     }
     
