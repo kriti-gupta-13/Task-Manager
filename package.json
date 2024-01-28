@@ -2,10 +2,10 @@
   "name": "task-manager",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "env-cmd -f ./config/.env nodemon src/index.js"
+    "start": "node src/app.js",
+    "dev": "env-cmd -f ./config/.env nodemon src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -13,8 +13,10 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.1.5",
+    "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "hbs": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "mongodb": "^6.3.0",

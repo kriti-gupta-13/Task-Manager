@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    <div class="signup-container">
+        <h2>Signup</h2>
+        <form id="signup-form" action="/signup" method="post">
+        <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="name" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="submit">signup</button>
+            </div>
+        </form>
+    </div>
+    <script>
+    document.getElementById('submit').addEventListener('click', function (event) {
+        event.preventDefault();
+        var mail = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        var name = document.getElementById('name').value;
+        var data = {
+            mail: mail,
+            password: password,
+            name: name
+        };
+        console.log(data);
+        fetch('http://localhost:3000/users/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(res => {
+            console.log(res);
+            if (res.user._id) {
+                window.localStorage.setItem('user-token', res.token);
+                window.location.href = 'http://localhost:3000/'; // redirect to home page
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+
+    </script>
+</body>
+</html>

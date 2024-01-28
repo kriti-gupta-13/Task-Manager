@@ -1,14 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const Task = require('../models/task')
-const auth = require('../middleware/auth.js')
+const middlewares = require('../middleware/auth.js')
 const moment = require('moment')
 const scheduleEmails = require('../utils/scheduler')
 
 
 
 
-router.post('/tasks', auth, async (req,res) => {
+router.post('/tasks', middlewares.auth, async (req,res) => {
     try{
     const taskData = {
         ...req.body, // spread operator - spreads iterable into individual elements
@@ -16,7 +16,7 @@ router.post('/tasks', auth, async (req,res) => {
     }
     
     const dueDate = req.body.dueDate
-    const dueDateTime = moment(dueDate, 'YYYY-MM-DD HH:mm')
+    const dueDateTime = moment(dueDate, 'YYYY-MM-DD HH:mm') // change format to fronted
     taskData.dueDate = dueDateTime.toDate()
 
     const task = new Task(taskData)
@@ -40,7 +40,7 @@ router.post('/tasks', auth, async (req,res) => {
 //GET /tasks?completed=false
 //GET /tasks?limit=2&skip=2
 //GET /tasks?sortBy=createdAt:desc
-router.get('/tasks', auth, async (req, res) => {
+router.get('/tasks', middlewares.auth, async (req, res) => {
 
     try{
         const match = {}
@@ -74,7 +74,7 @@ router.get('/tasks', auth, async (req, res) => {
     }
 })
 
-router.get('/tasks/:id', auth, async (req, res) => {   
+router.get('/tasks/:id', middlewares.auth, async (req, res) => {   
     const _id = req.params.id 
     
     try{
@@ -97,7 +97,7 @@ router.get('/tasks/:id', auth, async (req, res) => {
 })
 
 
-router.patch('/tasks/:id', auth, async (req, res) => {
+router.patch('/tasks/:id', middlewares.auth, async (req, res) => {
 
     const allowedUpdates = ["description", "completed"]
     const updates = Object.keys(req.body)
@@ -127,7 +127,7 @@ router.patch('/tasks/:id', auth, async (req, res) => {
 })
 
 
-router.delete('/tasks/:id', auth, async (req, res) => {
+router.delete('/tasks/:id', middlewares.auth, async (req, res) => {
     
     try {
         const task = await Task.findOneAndDelete({_id : req.params.id, owner : req.user._id })

@@ -1,24 +1,50 @@
 const express = require('express')
 const router = new express.Router()
-const auth = require('../middleware/auth.js')
+const middlewares = require('../middleware/auth.js')
 const User = require('../models/user')
-const emails = require('../emails/accounts') 
+const emails = require('../emails/accounts')
+const Task = require('../models/task.js') 
+
+//frontend routes
+router.get('/signup', async (req, res) => {
+    res.render('signup')
+})
+
+router.get('/login', async (req, res) => {
+    res.render('login')
+})
+
+router.get('/', middlewares.cookieAuth, async (req, res) => {
+    const tasks = await Task.find({owner: req.user._id})
+    res.render('home',{
+        name: req.user.name,
+        tasks: tasks
+    })
+})
+
+router.get('/profile', middlewares.cookieAuth, async (req, res) => {
+    res.render('profile',{
+        name: req.user.name,
+        email: req.user.mail
+    })
+})
 
 
-router.post('/users', async (req, res) => {
-    const user = new User(req.body)
-
-
+//backend routes
+router.post('/users/signup', async (req, res) => {
     try {
+        
+        const user = new User(req.body)
         await user.save()
         emails.sendWelcomeMail(user.mail,user.name) // async but dont need to wait therefore no await 
         const token = await user.generateAuthToken()
 
         console.log(user)
-        res.status(201).send({user, token}) // will go into res.body
+        return res.status(201).cookie('task-manager-token', token).send({user, token}) // will go into res.body
     }
 
     catch(e){
+        console.log(e)
         res.status(400).send(e) //y hardcode 400, y not 500? could be other error too; y we had to specify ; y 200 was coming when clearly it was an error   
     }
 })
@@ -27,13 +53,13 @@ router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.mail, req.body.password)
         const token = await user.generateAuthToken()
-        res.send({user, token})
+        return res.status(201).cookie('task-manager-token', token).send({user, token})
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
-router.post('/users/logout', auth, async (req, res) => {
+router.post('/users/logout', middlewares.auth, async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((element) => element.token != req.token)
         await req.user.save()
@@ -44,7 +70,7 @@ router.post('/users/logout', auth, async (req, res) => {
     }
 })
 
-router.post('/users/logoutAll', auth, async (req, res) => {
+router.post('/users/logoutAll', middlewares.auth, async (req, res) => {
     try {
         req.user.tokens = []
         await req.user.save()
@@ -55,13 +81,13 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 })
 
-router.get('/users/me', auth, async (req, res) => {
+router.get('/users/me', middlewares.auth, async (req, res) => {
 
     res.send(req.user)
 })
 
 
-router.patch('/users/me', auth, async (req, res) => {
+router.patch('/users/me', middlewares.auth, async (req, res) => {
     
 
     // to communicate error when non-existent fields r updated
@@ -91,7 +117,7 @@ router.patch('/users/me', auth, async (req, res) => {
 })
 
 
-router.delete('/users/me', auth, async (req, res) => {
+router.delete('/users/me', middlewares.auth, async (req, res) => {
     
     try {
         await req.user.deleteOne()
