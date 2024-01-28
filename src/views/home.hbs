@@ -18,7 +18,7 @@
         <input type="datetime-local" id="dueDate" name="dueDate" required><br>
     </div>
     <div>
-        <button type="submit">Submit</button>
+        <button type="submit" id="submit">Submit</button>
     </div>
 </form>
     <h2>Due Tasks</h2>
@@ -27,5 +27,34 @@
     <li>{{description}} - {{dueDate}}</li>
   {{/each}}
 </ul></p>
+<script>
+    document.getElementById('submit').addEventListener('click', function (event) {
+        event.preventDefault();
+        var description = document.getElementById('description').value;
+        var dueDate = document.getElementById('dueDate').value;
+        var data = {
+            description,
+            dueDate
+        };
+        console.log(data);
+        fetch('http://localhost:3000/tasks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(res => {
+            console.log(res);
+            if (res.task._id) {
+                alert("task created!")
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+</script>
 </body>
 </html>

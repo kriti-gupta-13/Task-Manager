@@ -50,7 +50,6 @@
         .then(res => {
             console.log(res);
             if (res.user._id) {
-                window.localStorage.setItem('user-token', res.token);
                 window.location.href = 'http://localhost:3000/'; // redirect to home page
             }
         })

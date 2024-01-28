@@ -8,7 +8,7 @@ const scheduleEmails = require('../utils/scheduler')
 
 
 
-router.post('/tasks', middlewares.auth, async (req,res) => {
+router.post('/tasks', middlewares.cookieAuth, async (req,res) => {
     try{
     const taskData = {
         ...req.body, // spread operator - spreads iterable into individual elements
@@ -29,7 +29,7 @@ router.post('/tasks', middlewares.auth, async (req,res) => {
 
     await scheduleEmails(task._id, delay, req.user.mail, task.description)
 
-    res.status(201).send(task)
+    res.status(201).send({task})
     }
     
     catch(e) {
