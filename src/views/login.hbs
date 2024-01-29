@@ -4,55 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
-    <h1>Task Manager Login</h1>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form id="login-form" action="/login" method="post">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <!-- vh-100 makes the container take the full viewport height -->
+        <div class="card p-4">
+            <h1 class="text-center mb-4">Task Manager Login</h1>
+            <div id="login-form">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="login--button">Login</button>
             </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <button type="submit" id="login--button">Login</button>
-            </div>
-        </form>
+        </div>
     </div>
+    
     <script>
-    document.getElementById('login--button').addEventListener('click', function (event) {
-        event.preventDefault();
-        var email = document.getElementById('email').value;
-        var password = document.getElementById('password').value;
-        var data = {
-            mail: email,
-            password: password
-        };
-        console.log(data);
-        fetch('http://localhost:3000/users/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(res => {
-            console.log(res);
-            if (res.user._id) {
-                //window.localStorage.setItem('user-token', res.token);
-                window.location.href = 'http://localhost:3000/'; // redirect to home page
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    });
 
+
+        // Function to retrieve the value of a specific cookie
+        function getCookie(cookieName) {
+            // Split the document.cookie string into an array of individual cookies
+            const cookies = document.cookie.split(';');
+
+            // Loop through the array to find the cookie with the specified name
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim(); // Remove whitespace
+
+                // Check if the cookie starts with the specified name
+                if (cookie.startsWith(cookieName + '=')) {
+                    // Return the value of the cookie (substring after the '=' character)
+                    return cookie.substring(cookieName.length + 1); 
+                }
+            }
+
+            // If the cookie with the specified name is not found, return null
+            return null;
+        }
+        
+        if (getCookie('task-manager-token')) {
+            window.location.href = 'http://localhost:3000/'
+        }
+
+        document.getElementById('login--button').addEventListener('click', function (event) {
+            event.preventDefault();
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var data = {
+                mail: email,
+                password: password
+            };
+            console.log(data);
+            fetch('http://localhost:3000/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(res => {
+                console.log(res);
+                if (res.user._id) {
+                    window.location.href = 'http://localhost:3000/'; // redirect to home page
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
     </script>
 </body>
 </html>
