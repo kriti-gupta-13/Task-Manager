@@ -126,15 +126,30 @@ router.patch('/tasks/:id', middlewares.auth, async (req, res) => {
     }
 })
 
+router.post('/tasks/mark-as-done/', middlewares.cookieAuth, async (req, res) => {
+    try{
+        console.log(req.body.taskId)
+        const task = await Task.findOne({_id : req.body.taskId })
+        task.completed = true
+        await task.save()
+        
+        res.send({task})
 
-router.delete('/tasks/:id', middlewares.auth, async (req, res) => {
+    }catch(e) {
+        console.log(e)
+        res.status(400).send(e)
+    }
+})
+
+
+router.delete('/task', middlewares.cookieAuth, async (req, res) => {
     
     try {
-        const task = await Task.findOneAndDelete({_id : req.params.id, owner : req.user._id })
+        const task = await Task.findOneAndDelete({_id : req.body.taskId })
         if(!task) {
             return res.status(404).send()
         }
-        res.send(task)
+        res.send({task})
     }
     catch(e) {
         res.status(500).send() 

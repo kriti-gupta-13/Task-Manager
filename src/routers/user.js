@@ -15,7 +15,7 @@ router.get('/login', async (req, res) => {
 })
 
 router.get('/', middlewares.cookieAuth, async (req, res) => {
-    const tasks = await Task.find({owner: req.user._id})
+    const tasks = await Task.find({owner: req.user._id, completed : false})
     res.render('home',{
         name: req.user.name,
         tasks: tasks
@@ -59,13 +59,15 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
-router.post('/users/logout', middlewares.auth, async (req, res) => {
+router.post('/users/logout', middlewares.cookieAuth, async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((element) => element.token != req.token)
+        res.cookie="task-manager-token="
         await req.user.save()
         res.send() // what the use of this?
 
     } catch(e) {
+        console.log(e)
         res.status(500).send()
     }
 })

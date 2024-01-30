@@ -19,9 +19,7 @@ const auth = async (req, res, next) => {
 }
 
 const cookieAuth = async (req, res, next) => {
-    try {
-        //const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1YjRlZDE1YWU0ZDQ5YmVjMmVmYTQ3OSIsImlhdCI6MTcwNjM1NTk4OSwiZXhwIjoxNzA2OTYwNzg5fQ.yE794ybHcdgEpYD5SWhUrz5hnxuAmiBkzmYet7dKW5U' 
-        console.log(req)
+    try {        
         const token = req.cookies['task-manager-token']
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findOne({_id : decoded.id, 'tokens.token' : token})
