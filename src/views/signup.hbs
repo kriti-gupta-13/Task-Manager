@@ -45,7 +45,7 @@
             name: name
         };
         console.log(data);
-        fetch('http://localhost:3000/users/signup', {
+        fetch('/users/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -56,7 +56,7 @@
         .then(res => {
             console.log(res);
             if (res.user._id) {
-                window.location.href = 'http://localhost:3000/'; // redirect to home page
+                window.location.href = '/'; // redirect to home page
             }
         })
         .catch((error) => {
