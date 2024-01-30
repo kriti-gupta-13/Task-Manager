@@ -22,7 +22,7 @@ const cookieAuth = async (req, res, next) => {
     try {        
         const token = req.cookies['task-manager-token']
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        const user = await User.findOne({_id : decoded.id, 'tokens.token' : token})
+        const user = await User.findOne({_id : decoded.id})
 
         if(!user) {
             throw new Error()

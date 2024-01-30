@@ -41,7 +41,6 @@ async (accessToken, refreshToken, profile, done) => {
     emails.sendWelcomeMail(user.mail,user.name)
     const token = await user.generateAuthToken()
     //res.status(201).send({user, token})
-
     return done(null, user);
   } catch (error) {
     return done(error, null);
@@ -58,19 +57,16 @@ router.get('/auth/google', passport.authenticate('google', {
 router.get("/failed", (req, res) => {
   res.send("Failed")
 })
-router.get("/success", (req, res) => {
-  res.send('Welcome')
-})
 
-// Callback route for Google OAuth
-router.get('/auth/google/callback',
-  passport.authenticate('google', {
-      failureRedirect: '/failed',
-  }),
-  function (req, res) {
-      res.redirect('/success')
 
-  }
+
+/// Callback route for Google OAuth
+// in success function, get the user info and add cookie to the response
+router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/failed' }),
+function(req, res) {
+    // Successful authentication, redirect home.
+    res.cookie('task-manager-token', req.user.tokens[0].token).redirect('/')
+}
 );
 
 module.exports = router

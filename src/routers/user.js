@@ -3,7 +3,8 @@ const router = new express.Router()
 const middlewares = require('../middleware/auth.js')
 const User = require('../models/user')
 const emails = require('../emails/accounts')
-const Task = require('../models/task.js') 
+const Task = require('../models/task.js')
+const moment = require('moment') 
 
 //frontend routes
 router.get('/signup', async (req, res) => {
@@ -16,9 +17,15 @@ router.get('/login', async (req, res) => {
 
 router.get('/', middlewares.cookieAuth, async (req, res) => {
     const tasks = await Task.find({owner: req.user._id, completed : false})
+    const formattedTasks = tasks.map((task) => {
+        //change the date format
+        task.dueDate = moment(task.dueDate).local().format('YYYY-MM-DD HH:mm:ss')
+        return task
+    })
+
     res.render('home',{
         name: req.user.name,
-        tasks: tasks
+        tasks: formattedTasks
     })
 })
 
@@ -64,7 +71,7 @@ router.post('/users/logout', middlewares.cookieAuth, async (req, res) => {
         req.user.tokens = req.user.tokens.filter((element) => element.token != req.token)
         res.cookie="task-manager-token="
         await req.user.save()
-        res.send() // what the use of this?
+        res.send({success : true}) // what the use of this?
 
     } catch(e) {
         console.log(e)
