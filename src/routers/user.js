@@ -16,16 +16,28 @@ router.get('/login', async (req, res) => {
 })
 
 router.get('/', middlewares.cookieAuth, async (req, res) => {
-    const tasks = await Task.find({owner: req.user._id, completed : false})
+    let tasks = await Task.find({owner: req.user._id, completed : false}).lean()
+    let completedTasks = await Task.find({owner: req.user._id, completed : true}).lean()
+
     const formattedTasks = tasks.map((task) => {
+        // check if task is overdue
+        const timeNow = moment().utc().format() // get current time in utc
+        const dueDate = moment(task.dueDate).utc().format() // get due date in utc
+        task.isOverdue = moment(dueDate).isBefore(timeNow) // check if due date is before current time
         //change the date format
-        task.dueDate = moment(task.dueDate).local().format('YYYY-MM-DD HH:mm:ss')
+        task.dueDate = moment(task.dueDate).local().format('MMM Do YYYY, h:mm:ss a').toString()
+        return task
+    })
+
+    const formattedCompleatedTasks = completedTasks.map((task) => {
+        task.dueDate = moment(task.dueDate).local().format('MMM Do YYYY, h:mm:ss a').toString()
         return task
     })
 
     res.render('home',{
         name: req.user.name,
-        tasks: formattedTasks
+        tasks: formattedTasks,
+        completedTasks: formattedCompleatedTasks
     })
 })
 
@@ -60,9 +72,10 @@ router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.mail, req.body.password)
         const token = await user.generateAuthToken()
-        return res.status(201).cookie('task-manager-token', token).send({user, token})
+        return res.status(201).cookie('task-manager-token', token).send({success : true})
     } catch (e) {
-        res.status(400).send(e)
+        console.log(e)
+        res.status(400).send({success : false})
     }
 })
 

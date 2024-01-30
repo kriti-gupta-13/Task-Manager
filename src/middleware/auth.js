@@ -21,6 +21,9 @@ const auth = async (req, res, next) => {
 const cookieAuth = async (req, res, next) => {
     try {        
         const token = req.cookies['task-manager-token']
+        if (!token) {
+            return res.redirect('/login')
+        }
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findOne({_id : decoded.id})
 
@@ -32,7 +35,7 @@ const cookieAuth = async (req, res, next) => {
         next()
     } catch(e) {
         console.log(e)
-        res.status(401).send("please authenticate")
+        return res.redirect('/login')
     }
 }
 

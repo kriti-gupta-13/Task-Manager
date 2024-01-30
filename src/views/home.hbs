@@ -16,11 +16,11 @@
                 <h2 class="d-flex justify-content-around">Create Tasks</h2>
                 <form id="taskform">
                     <div class="mb-3">
-                        <label for="description" class="form-label">Description:</label>
+                        <label for="description" class="form-label">Description</label>
                         <input type="text" class="form-control" id="description" name="description" required>
                     </div>
                     <div class="mb-3">
-                        <label for="dueDate" class="form-label">Due Date and Time:</label>
+                        <label for="dueDate" class="form-label">Due Date and Time</label>
                         <input type="datetime-local" class="form-control" id="dueDate" name="dueDate" required>
                     </div>
                     <div class="mb-3 float float-end mt-3">
@@ -33,14 +33,35 @@
                 <h2 class="d-flex flex-row justify-content-around">Todo list</h2>
                 <div class="mt-3">
                     {{#each tasks}}
-                        <div class="border border-secondary bg-light rounded mb-3 px-2 py-1 mx-3">
+                        <div class="border border-light bg-light rounded mb-3 px-2 py-1 mx-3">
                             <div class="row">
-                                <div class="col-1 mt-4">
-                                    <span data-id="{{_id}}" style="cursor: pointer;" class="done--button">✅</span>
+                                <div class="col-1 mt-2">
+                                    {{!-- <span data-id="{{_id}}" style="cursor: pointer;" class="done--button">✅</span> --}}
+                                    <input data-id="{{_id}}" class="done--button" type="checkbox">
                                 </div>
                                 <div class="col-10">
                                     <p class="m-0">{{description}}</p>
-                                    <p class="m-0">{{dueDate}}</p>
+                                    {{#if isOverdue}}
+                                        <p class="m-0 text-danger">Due: {{dueDate}}</p>
+                                    {{else}}
+                                        <p class="m-0 text-secondary">Due: {{dueDate}}</p>
+                                    {{/if}}
+                                </div>
+                                <div class="col-1 mt-1">
+                                    <span data-id="{{_id}}" style="cursor: pointer;" class="delete--button">❌</span>
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                    {{#each completedTasks}}
+                        <div class="border border-light rounded mb-3 px-2 py-1 mx-3" style="background-color: rgb(224, 255, 227);">
+                            <div class="row">
+                                <div class="col-1 mt-2">
+                                    <span>✅</span>
+                                </div>
+                                <div class="col-10">
+                                    <p class="m-0 text-decoration-line-through">{{description}}</p>
+                                    <p class="m-0 text-secondary">Due: {{dueDate}}</p>
                                 </div>
                                 <div class="col-1 mt-1">
                                     <span data-id="{{_id}}" style="cursor: pointer;" class="delete--button">❌</span>
