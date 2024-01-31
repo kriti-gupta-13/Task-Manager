@@ -37,7 +37,6 @@
 
         // Function to retrieve the value of a specific cookie
         function getCookie(cookieName) {
-            // Split the document.cookie string into an array of individual cookies
             const cookies = document.cookie.split(';');
 
             // Loop through the array to find the cookie with the specified name
@@ -50,7 +49,6 @@
                     return cookie.substring(cookieName.length + 1); 
                 }
             }
-
             // If the cookie with the specified name is not found, return null
             return null;
         }

@@ -41,13 +41,6 @@ router.get('/', middlewares.cookieAuth, async (req, res) => {
     })
 })
 
-router.get('/profile', middlewares.cookieAuth, async (req, res) => {
-    res.render('profile',{
-        name: req.user.name,
-        email: req.user.mail
-    })
-})
-
 
 //backend routes
 router.post('/users/signup', async (req, res) => {
@@ -64,7 +57,7 @@ router.post('/users/signup', async (req, res) => {
 
     catch(e){
         console.log(e)
-        res.status(400).send(e) //y hardcode 400, y not 500? could be other error too; y we had to specify ; y 200 was coming when clearly it was an error   
+        res.status(400).send({e})   
     }
 })
 
@@ -81,74 +74,61 @@ router.post('/users/login', async (req, res) => {
 
 router.post('/users/logout', middlewares.cookieAuth, async (req, res) => {
     try {
-        req.user.tokens = req.user.tokens.filter((element) => element.token != req.token)
-        res.cookie="task-manager-token="
+        req.user.tokens = []
         await req.user.save()
-        res.send({success : true}) // what the use of this?
-
+        res.status(200).send({success : true})
     } catch(e) {
         console.log(e)
         res.status(500).send()
     }
 })
 
-router.post('/users/logoutAll', middlewares.auth, async (req, res) => {
-    try {
-        req.user.tokens = []
-        await req.user.save()
-        res.status(200).send() 
+// router.get('/users/me', middlewares.auth, async (req, res) => {
 
-    } catch(e) {
-        res.status(500).send()
-    }
-})
-
-router.get('/users/me', middlewares.auth, async (req, res) => {
-
-    res.send(req.user)
-})
+//     res.send(req.user)
+// })
 
 
-router.patch('/users/me', middlewares.auth, async (req, res) => {
+// router.patch('/users/me', middlewares.auth, async (req, res) => {
     
 
-    // to communicate error when non-existent fields r updated
-    const allowedUpdates = ["name", "mail", "password","age"]
-    const updates = Object.keys(req.body)
-    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
-    if (!isValidUpdate) {
-        return res.status(404).send("Invalid updates")
-    }
+//     // to communicate error when non-existent fields r updated
+//     const allowedUpdates = ["name", "mail", "password","age"]
+//     const updates = Object.keys(req.body)
+//     const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
+//     if (!isValidUpdate) {
+//         return res.status(404).send("Invalid updates")
+//     }
 
-    try {
-        //const user = await User.findById(_id)
+//     try {
+//         //const user = await User.findById(_id)
 
-        updates.forEach((update) => req.user[update] = req.body[update])
+//         updates.forEach((update) => req.user[update] = req.body[update])
 
-        await req.user.save()
+//         await req.user.save()
 
-        // findByIdAndUpdate bypasses middleware therefore not using it
-        //const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
+//         // findByIdAndUpdate bypasses middleware therefore not using it
+//         //const updatedUser = await User.findByIdAndUpdate(_id, req.body, {new : true, runValidators: true}) //how would we know it does not check validation, the docs r so poorly written
         
-        res.send(req.user)
+//         res.send(req.user)
 
-    }
-    catch(e) {
-        res.status(400).send(e) // did not mentioned 500 or server issues
-    }
-})
+//     }
+//     catch(e) {
+//         res.status(400).send(e) // did not mentioned 500 or server issues
+//     }
+//})
 
 
-router.delete('/users/me', middlewares.auth, async (req, res) => {
+// router.delete('/users/me', middlewares.auth, async (req, res) => {
     
-    try {
-        await req.user.deleteOne()
-        emails.sendDeleteMail(req.user.mail,req.user.name)
-        res.send(req.user)
-    } catch(e) {
-        res.status(500).send(e) 
-    }
+//     try {
+//         await req.user.deleteOne()
+//         emails.sendDeleteMail(req.user.mail,req.user.name)
+//         res.send(req.user)
+//     } catch(e) {
+//         res.status(500).send(e) 
+//     }
 
-})
+// })
 
 module.exports = router
